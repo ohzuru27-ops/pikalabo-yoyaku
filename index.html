@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ご予約フォーム | ピカラボ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #5BB8D4;
+    --sky-light: #EBF7FB;
+    --sky-dark: #3A9AB8;
+    --accent: #F4A428;
+    --accent-light: #FFF6E8;
+    --dark: #1C2B35;
+    --mid: #4A6572;
+    --light: #8FA8B4;
+    --bg: #F5FAFB;
+    --white: #FFFFFF;
+    --error: #E05C5C;
+    --success: #4CAF82;
+    --border: #D0E8EF;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(91,184,212,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--white);
+    border-bottom: 2px solid var(--sky-light);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(91,184,212,0.08);
+  }
+  .logo {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--sky-dark);
+    letter-spacing: 0.05em;
+  }
+  .logo span { color: var(--accent); }
+  .header-sub {
+    font-size: 12px;
+    color: var(--light);
+    margin-left: 4px;
+    padding-left: 12px;
+    border-left: 1px solid var(--border);
+  }
+
+  /* Progress */
+  .progress-bar {
+    background: var(--white);
+    padding: 16px 24px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .progress-fill {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    height: 2px;
+    background: var(--sky);
+    z-index: 1;
+    transition: width 0.4s ease;
+  }
+  .step-dot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 2;
+  }
+  .step-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--light);
+    transition: all 0.3s;
+  }
+  .step-dot.active .step-circle {
+    background: var(--sky);
+    border-color: var(--sky);
+    color: white;
+    box-shadow: 0 0 0 4px rgba(91,184,212,0.2);
+  }
+  .step-dot.done .step-circle {
+    background: var(--sky-dark);
+    border-color: var(--sky-dark);
+    color: white;
+  }
+  .step-label {
+    font-size: 10px;
+    color: var(--light);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .step-dot.active .step-label { color: var(--sky-dark); font-weight: 700; }
+  .step-dot.done .step-label { color: var(--sky-dark); }
+
+  /* Main */
+  .main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 28px 16px 80px;
+  }
+
+  /* Section card */
+  .section-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    animation: slideUp 0.35s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .section-header {
+    background: linear-gradient(135deg, var(--sky) 0%, var(--sky-dark) 100%);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .section-title {
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .section-title small {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+  .section-body { padding: 24px; }
+
+  /* Menu Cards */
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 480px) {
+    .menu-grid { grid-template-columns: 1fr; }
+  }
+  .menu-card {
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    background: var(--white);
+    position: relative;
+  }
+  .menu-card:hover { border-color: var(--sky); background: var(--sky-light); }
+  .menu-card.selected {
+    border-color: var(--sky);
+    background: var(--sky-light);
+    box-shadow: 0 0 0 3px rgba(91,184,212,0.2);
+  }
+  .menu-card .check-mark {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--sky);
+    color: white;
+    font-size: 11px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .menu-card.selected .check-mark { display: flex; }
+  .menu-emoji { font-size: 32px; margin-bottom: 8px; }
+  .menu-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 4px;
+  }
+  .menu-price {
+    font-size: 11px;
+    color: var(--sky-dark);
+    font-weight: 600;
+  }
+
+  /* Washer type */
+  .washer-type-area {
+    margin-top: 16px;
+    background: var(--sky-light);
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    display: none;
+  }
+  .washer-type-area.show { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .sub-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sky-dark);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sub-label::before { content: '▶'; font-size: 9px; }
+  .type-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  .type-btn {
+    flex: 1;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    background: white;
+    transition: all 0.2s;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .type-btn:hover { border-color: var(--sky); }
+  .type-btn.selected { border-color: var(--sky); background: white; box-shadow: 0 0 0 3px rgba(91,184,212,0.2); }
+  .type-btn .type-icon { font-size: 24px; margin-bottom: 4px; }
+  .type-btn .type-name { font-size: 13px; font-weight: 700; color: var(--dark); }
+  .type-btn .type-price { font-size: 11px; color: var(--sky-dark); font-weight: 600; }
+
+  /* Options */
+  .options-section { display: none; }
+  .options-section.show { display: block; margin-top: 20px; }
+  .option-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+  }
+  .option-item:hover { border-color: var(--sky); background: var(--sky-light); }
+  .option-item.selected { border-color: var(--sky); background: var(--sky-light); }
+  .option-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-top: 1px;
+  }
+  .option-item.selected .option-checkbox {
+    background: var(--sky);
+    border-color: var(--sky);
+    color: white;
+    font-size: 12px;
+  }
+  .option-info { flex: 1; }
+  .option-name { font-size: 13px; font-weight: 700; color: var(--dark); }
+  .option-desc { font-size: 11px; color: var(--mid); margin-top: 2px; }
+  .option-price { font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+
+  /* Price table */
+  .price-table-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sky-dark);
+    cursor: pointer;
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: var(--sky-light);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    user-select: none;
+  }
+  .price-table-toggle span { margin-left: auto; transition: transform 0.2s; }
+  .price-table-toggle.open span { transform: rotate(180deg); }
+  .price-table-wrap {
+    display: none;
+    margin-top: 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .price-table-wrap.show { display: block; animation: fadeIn 0.2s; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: var(--sky); color: white; padding: 8px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--sky-light); }
+  .price-note { font-size: 11px; color: var(--mid); padding: 8px 12px; background: var(--bg); }
+
+  /* Calendar */
+  .calendar-wrap { margin-bottom: 20px; }
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .cal-nav {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: white;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sky-dark);
+    transition: all 0.2s;
+  }
+  .cal-nav:hover { background: var(--sky); color: white; border-color: var(--sky); }
+  .cal-month { font-size: 15px; font-weight: 700; color: var(--dark); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-day-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 0;
+    color: var(--mid);
+  }
+  .cal-day-label:first-child { color: #E05C5C; }
+  .cal-day-label:last-child { color: var(--sky-dark); }
+  .cal-cell {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    position: relative;
+    font-weight: 500;
+  }
+  .cal-cell.empty { cursor: default; }
+  .cal-cell.past { color: #C0C0C0; cursor: not-allowed; }
+  .cal-cell.unavailable {
+    background: #FFF0F0;
+    color: #C0C0C0;
+    cursor: not-allowed;
+  }
+  .cal-cell.unavailable::after {
+    content: '×';
+    position: absolute;
+    font-size: 8px;
+    bottom: 2px;
+    right: 3px;
+    color: #E05C5C;
+  }
+  .cal-cell.available { color: var(--dark); }
+  .cal-cell.available:hover { background: var(--sky-light); border-color: var(--sky); }
+  .cal-cell.selected {
+    background: var(--sky);
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(91,184,212,0.4);
+  }
+  .cal-cell.sun { color: #E05C5C; }
+  .cal-cell.sun.selected { color: white; }
+  .cal-cell.sat { color: var(--sky-dark); }
+  .cal-cell.sat.selected { color: white; }
+  .cal-cell.today { border: 2px solid var(--accent); }
+
+  .selected-dates {
+    background: var(--sky-light);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+  .selected-dates-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--sky-dark);
+    margin-bottom: 8px;
+  }
+  .date-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--sky);
+    color: white;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 3px;
+  }
+  .date-tag button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    margin-left: 2px;
+  }
+
+  .time-slots {
+    margin-top: 16px;
+  }
+  .time-slots-label { font-size: 13px; font-weight: 700; color: var(--mid); margin-bottom: 8px; }
+  .time-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .time-slot {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--mid);
+    background: white;
+    transition: all 0.15s;
+  }
+  .time-slot:hover { border-color: var(--sky); color: var(--sky-dark); }
+  .time-slot.selected { background: var(--sky); color: white; border-color: var(--sky); }
+
+  /* Input fields */
+  .field-group { margin-bottom: 18px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--mid);
+    margin-bottom: 6px;
+  }
+  label .required {
+    display: inline-block;
+    background: var(--error);
+    color: white;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+  label .optional {
+    display: inline-block;
+    background: var(--border);
+    color: var(--mid);
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+  input[type="text"],
+  input[type="tel"],
+  input[type="email"],
+  textarea,
+  select {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    color: var(--dark);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--sky);
+    box-shadow: 0 0 0 3px rgba(91,184,212,0.15);
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .radio-group {
+    display: flex;
+    gap: 10px;
+  }
+  .radio-btn {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mid);
+    background: white;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-btn:hover { border-color: var(--sky); color: var(--sky-dark); }
+  .radio-btn.selected { background: var(--sky); color: white; border-color: var(--sky); }
+
+  /* Confirm */
+  .confirm-block {
+    background: var(--sky-light);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .confirm-block h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--sky-dark);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .confirm-row {
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+    margin-bottom: 6px;
+    line-height: 1.5;
+  }
+  .confirm-key { color: var(--mid); min-width: 120px; flex-shrink: 0; font-weight: 500; }
+  .confirm-val { color: var(--dark); font-weight: 600; }
+
+  /* Agreement */
+  .agreement-box {
+    background: #FFFAF0;
+    border: 1px solid #F4D88A;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: var(--mid);
+    line-height: 1.8;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+  .agreement-box h4 { color: var(--dark); font-size: 13px; margin-bottom: 8px; }
+  .check-agree {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+  .check-agree input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    accent-color: var(--sky);
+    margin-top: 2px;
+    cursor: pointer;
+  }
+  .check-agree span { font-size: 13px; font-weight: 600; color: var(--dark); }
+
+  /* Buttons */
+  .btn-next {
+    width: 100%;
+    background: linear-gradient(135deg, var(--sky) 0%, var(--sky-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 16px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 16px rgba(91,184,212,0.35);
+  }
+  .btn-next:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(91,184,212,0.45); }
+  .btn-next:disabled { background: var(--border); box-shadow: none; cursor: not-allowed; transform: none; }
+  .btn-back {
+    width: 100%;
+    background: white;
+    color: var(--mid);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+  .btn-back:hover { border-color: var(--sky); color: var(--sky-dark); }
+  .btn-line {
+    width: 100%;
+    background: #06C755;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 18px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(6,199,85,0.35);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    margin-bottom: 10px;
+  }
+  .btn-line:hover { background: #05b34b; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(6,199,85,0.45); }
+  .line-icon { font-size: 22px; }
+
+  /* Error msg */
+  .error-msg {
+    color: var(--error);
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
+  .error-banner {
+    background: #FFF0F0;
+    border: 1px solid #F4B8B8;
+    border-radius: 8px;
+    color: var(--error);
+    font-size: 13px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .error-banner.show { display: block; }
+
+  /* Complete */
+  .complete-card {
+    text-align: center;
+    padding: 40px 24px;
+  }
+  .complete-icon {
+    width: 80px;
+    height: 80px;
+    background: #E8F8EF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    margin: 0 auto 20px;
+  }
+  .complete-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 10px;
+  }
+  .complete-sub {
+    font-size: 14px;
+    color: var(--mid);
+    line-height: 1.8;
+    margin-bottom: 28px;
+  }
+  .complete-notice {
+    background: var(--sky-light);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 13px;
+    color: var(--mid);
+    text-align: left;
+    line-height: 1.8;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+
+  .steps-nav { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+
+  /* Legend */
+  .cal-legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--mid);
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+  .legend-dot.available { background: var(--sky-light); border: 1px solid var(--sky); }
+  .legend-dot.unavailable { background: #FFF0F0; border: 1px solid #F4B8B8; }
+  .legend-dot.selected { background: var(--sky); }
+
+  .hint { font-size: 11px; color: var(--light); margin-top: 5px; }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo">ピカ<span>ラボ</span></div>
+  <div class="header-sub">ハウスクリーニング予約フォーム</div>
+</div>
+
+<!-- Progress -->
+<div class="progress-bar">
+  <div class="progress-steps" id="progressSteps">
+    <div class="progress-fill" id="progressFill"></div>
+    <div class="step-dot active" id="dot0">
+      <div class="step-circle">1</div>
+      <div class="step-label">メニュー</div>
+    </div>
+    <div class="step-dot" id="dot1">
+      <div class="step-circle">2</div>
+      <div class="step-label">オプション</div>
+    </div>
+    <div class="step-dot" id="dot2">
+      <div class="step-circle">3</div>
+      <div class="step-label">日時</div>
+    </div>
+    <div class="step-dot" id="dot3">
+      <div class="step-circle">4</div>
+      <div class="step-label">お客様情報</div>
+    </div>
+    <div class="step-dot" id="dot4">
+      <div class="step-circle">5</div>
+      <div class="step-label">確認・送信</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- STEP 1: メニュー選択 -->
+<div id="step1" class="section-card">
+  <div class="section-header">
+    <div class="section-icon">🧹</div>
+    <div class="section-title">
+      クリーニングメニューの選択
+      <small>ご希望のメニューをお選びください</small>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="menu-grid">
+      <div class="menu-card" data-menu="washer" onclick="selectMenu('washer')">
+        <div class="check-mark">✓</div>
+        <div class="menu-emoji">
+          <svg viewBox="0 0 64 64" width="52" height="52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="4" width="52" height="56" rx="5" fill="#EBF7FB" stroke="#5BB8D4" stroke-width="2.5"/>
+            <rect x="6" y="4" width="52" height="14" rx="5" fill="#5BB8D4"/>
+            <circle cx="14" cy="11" r="2.5" fill="white"/>
+            <circle cx="22" cy="11" r="2.5" fill="white"/>
+            <rect x="38" y="7" width="14" height="8" rx="2" fill="white" opacity="0.3"/>
+            <circle cx="32" cy="38" r="14" stroke="#5BB8D4" stroke-width="2.5" fill="white"/>
+            <circle cx="32" cy="38" r="9" stroke="#3A9AB8" stroke-width="2" stroke-dasharray="4 3" fill="#EBF7FB"/>
+            <circle cx="32" cy="38" r="3" fill="#5BB8D4"/>
+            <circle cx="26" cy="32" r="2" fill="#5BB8D4" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="menu-name">洗濯機<br>分解清掃</div>
+        <div class="menu-price">¥20,000〜</div>
+      </div>
+      <div class="menu-card" data-menu="furo" onclick="selectMenu('furo')">
+        <div class="check-mark">✓</div>
+        <div class="menu-emoji">
+          <svg viewBox="0 0 72 64" width="58" height="52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- 浴槽本体（猫足バスタブ風） -->
+            <path d="M10 34 Q8 50 12 54 L60 54 Q64 50 62 34 Z" fill="#EBF7FB" stroke="#5BB8D4" stroke-width="2.2" stroke-linejoin="round"/>
+            <!-- 浴槽のフチ -->
+            <path d="M8 34 Q8 30 11 30 L61 30 Q64 30 64 34" fill="#5BB8D4" stroke="#5BB8D4" stroke-width="1.5" opacity="0.7"/>
+            <!-- 猫足（左） -->
+            <path d="M16 54 Q14 58 12 60 Q15 61 18 60 Q17 57 18 54" fill="#5BB8D4" opacity="0.5"/>
+            <!-- 猫足（右） -->
+            <path d="M56 54 Q58 58 60 60 Q57 61 54 60 Q55 57 54 54" fill="#5BB8D4" opacity="0.5"/>
+            <!-- 水面 -->
+            <path d="M11 42 Q25 38 36 42 Q47 46 62 42" stroke="#3A9AB8" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+            <!-- シャワーホース -->
+            <path d="M62 30 Q66 26 66 18 Q66 10 60 8" stroke="#5BB8D4" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+            <!-- シャワーヘッド -->
+            <rect x="54" y="4" width="10" height="6" rx="3" fill="#5BB8D4"/>
+            <line x1="55" y1="10" x2="54" y2="13" stroke="#5BB8D4" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="58" y1="10" x2="57" y2="13" stroke="#5BB8D4" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="61" y1="10" x2="61" y2="13" stroke="#5BB8D4" stroke-width="1.2" stroke-linecap="round"/>
+            <line x1="63" y1="10" x2="64" y2="13" stroke="#5BB8D4" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="menu-name">風呂釜<br>洗浄</div>
+        <div class="menu-price">¥20,000〜</div>
+      </div>
+      <div class="menu-card" data-menu="aircon" onclick="selectMenu('aircon')">
+        <div class="check-mark">✓</div>
+        <div class="menu-emoji">
+          <svg viewBox="0 0 64 64" width="52" height="52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="14" width="56" height="22" rx="6" fill="#EBF7FB" stroke="#5BB8D4" stroke-width="2.5"/>
+            <rect x="4" y="14" width="56" height="10" rx="6" fill="#5BB8D4" opacity="0.15"/>
+            <circle cx="50" cy="25" r="4" fill="#5BB8D4" opacity="0.4"/>
+            <rect x="12" y="20" width="24" height="3" rx="1.5" fill="#5BB8D4"/>
+            <rect x="12" y="26" width="16" height="2" rx="1" fill="#5BB8D4" opacity="0.5"/>
+            <line x1="16" y1="36" x2="14" y2="50" stroke="#5BB8D4" stroke-width="2" stroke-linecap="round"/>
+            <line x1="28" y1="36" x2="28" y2="52" stroke="#5BB8D4" stroke-width="2" stroke-linecap="round"/>
+            <line x1="40" y1="36" x2="42" y2="50" stroke="#5BB8D4" stroke-width="2" stroke-linecap="round"/>
+            <path d="M10 48 Q20 44 28 50 Q36 56 46 48" stroke="#3A9AB8" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="menu-name">エアコン<br>分解清掃</div>
+        <div class="menu-price">¥11,000〜</div>
+      </div>
+    </div>
+
+    <!-- 洗濯機タイプ選択 -->
+    <div class="washer-type-area" id="washerTypeArea">
+      <div class="sub-label">洗濯機の種類を選択してください</div>
+      <div class="type-buttons">
+        <button class="type-btn" data-type="縦型〜8kg" onclick="selectWasherType('縦型〜8kg')">
+          <div class="type-name">縦型〜8kg</div>
+          <div class="type-price">¥20,000</div>
+        </button>
+        <button class="type-btn" data-type="縦型10kg〜" onclick="selectWasherType('縦型10kg〜')">
+          <div class="type-name">縦型10kg〜</div>
+          <div class="type-price">¥23,000</div>
+        </button>
+        <button class="type-btn" data-type="ドラム型" onclick="selectWasherType('ドラム型')">
+          <div class="type-name">ドラム型</div>
+          <div class="type-price">¥30,000〜</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- 料金表 -->
+    <div class="price-table-toggle" id="priceToggle" onclick="togglePrice()">
+      📋 料金表を確認する
+      <span>▼</span>
+    </div>
+    <div class="price-table-wrap" id="priceTableWrap">
+      <table>
+        <tr><th colspan="2">洗濯機 分解清掃</th></tr>
+        <tr><td>縦型（〜8kg）</td><td>¥20,000</td></tr>
+        <tr><td>縦型（10kg〜）</td><td>¥23,000</td></tr>
+        <tr><td>ドラム型</td><td>¥30,000〜</td></tr>
+        <tr><th colspan="2">風呂釜洗浄</th></tr>
+        <tr><td>1つ穴タイプ</td><td>¥20,000</td></tr>
+        <tr><th colspan="2">エアコン 分解清掃</th></tr>
+        <tr><td>ノーマル壁掛け</td><td>¥11,000〜</td></tr>
+        <tr><td>お掃除機能付き壁掛け</td><td>¥16,000〜</td></tr>
+        <tr><td>天井埋め込み</td><td>¥18,000〜</td></tr>
+        <tr><td>業務用エアコン4方向</td><td>¥25,000〜</td></tr>
+      </table>
+      <div class="price-note">※ 料金はすべて税込です。詳細はLINEにてご確認ください。</div>
+    </div>
+
+    <div class="error-msg" id="menuError">メニューをお選びください</div>
+
+    <div class="steps-nav">
+      <button class="btn-next" onclick="goStep2()">次へ　オプション選択 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2: オプション -->
+<div id="step2" class="section-card" style="display:none;">
+  <div class="section-header">
+    <div class="section-icon">✨</div>
+    <div class="section-title">
+      オプションの選択
+      <small>追加オプションをお選びください（任意）</small>
+    </div>
+  </div>
+  <div class="section-body">
+    <div id="optionsContainer"></div>
+    <div class="hint">※ オプションなしでも申し込みいただけます</div>
+    <div class="divider"></div>
+    <div class="steps-nav">
+      <button class="btn-next" onclick="goStep3()">次へ　日時選択 →</button>
+      <button class="btn-back" onclick="goStep(1)">← 戻る</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3: 日時選択 -->
+<div id="step3" class="section-card" style="display:none;">
+  <div class="section-header">
+    <div class="section-icon">📅</div>
+    <div class="section-title">
+      希望日時の選択
+      <small>日付を選んで時間帯を指定してください（最大3つ）</small>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="calendar-wrap">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="changeMonth(-1)">◀</button>
+        <div class="cal-month" id="calMonth"></div>
+        <button class="cal-nav" onclick="changeMonth(1)">▶</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <div class="legend-item"><div class="legend-dot available"></div>予約可能</div>
+        <div class="legend-item"><div class="legend-dot unavailable"></div>予約不可</div>
+        <div class="legend-item"><div class="legend-dot selected"></div>選択中</div>
+      </div>
+    </div>
+
+    <!-- 時間帯選択（日付選択後に表示） -->
+    <div id="timePickerArea" style="display:none;margin-top:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--sky-dark);margin-bottom:8px;">
+        ▶ <span id="timePickerDateLabel"></span> の時間帯を選択
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div class="time-slot" id="slot_9" onclick="selectTimeSlot('9:00〜')">
+          🌅 午前スタート<br><strong>9:00〜</strong>
+        </div>
+        <div class="time-slot" id="slot_14" onclick="selectTimeSlot('14:00〜')">
+          🌇 午後スタート<br><strong>14:00〜</strong>
+        </div>
+      </div>
+      <div class="error-msg" id="timeSlotError">時間帯を選択してください</div>
+      <div class="hint" style="margin-top:6px;">※ 確定時刻はLINEにてご連絡します</div>
+    </div>
+
+    <div class="selected-dates" id="selectedDatesBox" style="display:none;">
+      <div class="selected-dates-title">選択した希望日時</div>
+      <div id="selectedDateTags"></div>
+    </div>
+
+    <div class="error-msg" id="dateError">希望日時を第1〜第3希望まで3つ選択してください</div>
+    <div class="divider"></div>
+    <div class="steps-nav">
+      <button class="btn-next" onclick="goStep4()">次へ　お客様情報の入力 →</button>
+      <button class="btn-back" onclick="goStep(2)">← 戻る</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4: お客様情報 -->
+<div id="step4" class="section-card" style="display:none;">
+  <div class="section-header">
+    <div class="section-icon">👤</div>
+    <div class="section-title">
+      お客様情報の入力
+      <small>作業当日のご連絡に使用します</small>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="field-group">
+      <label>お名前 <span class="required">必須</span></label>
+      <input type="text" id="name" placeholder="例：山田 太郎" />
+      <div class="error-msg" id="nameError">お名前を入力してください</div>
+    </div>
+    <div class="field-group">
+      <label>電話番号 <span class="required">必須</span></label>
+      <input type="tel" id="phone" placeholder="例：090-1234-5678" />
+      <div class="error-msg" id="phoneError">電話番号を入力してください</div>
+    </div>
+    <div class="field-group">
+      <label>ご住所 <span class="required">必須</span></label>
+      <input type="text" id="address" placeholder="例：東京都渋谷区〇〇1-2-3 〇〇マンション101号" />
+      <div class="error-msg" id="addressError">ご住所を入力してください</div>
+    </div>
+    <div class="field-group">
+      <label>駐車場 <span class="required">必須</span></label>
+      <div class="hint" style="margin-bottom:8px;">作業車の駐車についてお教えください</div>
+      <div class="radio-group">
+        <div class="radio-btn" onclick="selectRadio('parking', 'あり（無料）', this)">あり（無料）</div>
+        <div class="radio-btn" onclick="selectRadio('parking', 'あり（有料）', this)">あり（有料）</div>
+        <div class="radio-btn" onclick="selectRadio('parking', 'なし', this)">なし</div>
+      </div>
+      <div class="error-msg" id="parkingError">駐車場の有無を選択してください</div>
+    </div>
+    <div class="field-group">
+      <label>エレベーター <span class="required">必須</span></label>
+      <div class="radio-group">
+        <div class="radio-btn" onclick="selectRadio('elevator', 'あり', this)">あり</div>
+        <div class="radio-btn" onclick="selectRadio('elevator', 'なし', this)">なし</div>
+        <div class="radio-btn" onclick="selectRadio('elevator', '1階', this)">1階</div>
+      </div>
+      <div class="error-msg" id="elevatorError">エレベーターの有無を選択してください</div>
+    </div>
+    <div class="field-group">
+      <label>ご要望・メモ <span class="optional">任意</span></label>
+      <textarea id="notes" placeholder="例：玄関前に段差があります。作業中に立ち会えない時間帯があります。など"></textarea>
+    </div>
+    <div class="steps-nav">
+      <button class="btn-next" onclick="goStep5()">次へ　内容確認 →</button>
+      <button class="btn-back" onclick="goStep(3)">← 戻る</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 5: 確認・送信 -->
+<div id="step5" class="section-card" style="display:none;">
+  <div class="section-header">
+    <div class="section-icon">✅</div>
+    <div class="section-title">
+      内容確認・同意
+      <small>内容をご確認のうえ、LINEで申し込みへ進んでください</small>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="confirm-block">
+      <h4>📋 申し込み内容</h4>
+      <div id="confirmContent"></div>
+    </div>
+
+    <div class="agreement-box">
+      <h4>📌 キャンセル・注意事項</h4>
+      <strong>キャンセルポリシー</strong><br>
+      ・当日・無断キャンセル：料金の100%<br>
+      ・前日キャンセル：料金の50%<br>
+      ・2〜3日前キャンセル：料金の30%<br><br>
+      <strong>作業に関する注意事項</strong><br>
+      ・7年以上経過した洗濯機は保証対象外となります<br>
+      ・10年以上経過したエアコンは保証対象外となります<br>
+      ・作業完了後の試運転の立ち会いをお願いしております<br>
+      ・当日追加メニューがある際は、あらかじめご説明いたします<br><br>
+      <strong>個人情報の取扱い</strong><br>
+      ・ご記入いただいた情報は予約・作業のみに使用します<br>
+      ・第三者への提供は行いません
+    </div>
+
+    <label class="check-agree">
+      <input type="checkbox" id="agreeCheck" onchange="updateAgree()" />
+      <span>上記の注意事項・キャンセルポリシー・個人情報の取扱いに同意します</span>
+    </label>
+
+    <div class="error-banner" id="agreeError">同意のチェックを入れてください</div>
+
+    <div style="margin-top:20px;">
+      <a id="lineBtn" href="#" class="btn-line" onclick="submitToLine(event)">
+        <span class="line-icon">💬</span>
+        LINEで申し込みを完了する
+      </a>
+      <div class="hint" style="text-align:center;">※ タップするとLINE公式アカウントの友達追加画面が開きます</div>
+    </div>
+
+    <button class="btn-back" onclick="goStep(4)">← 戻る</button>
+  </div>
+</div>
+
+<!-- STEP 6: 完了 -->
+<div id="step6" class="section-card" style="display:none;">
+  <div class="complete-card">
+    <div class="complete-icon">🎉</div>
+    <div class="complete-title">入力完了！</div>
+    <div class="complete-sub">
+      あと<strong>1ステップ</strong>で予約申し込みが完了します
+    </div>
+
+    <div style="background:linear-gradient(135deg,#E8F8EF,#D4F2E4);border:2px solid #4CAF82;border-radius:12px;padding:20px;margin-bottom:20px;text-align:left;">
+      <div style="font-size:15px;font-weight:700;color:#2E7D52;margin-bottom:12px;">📲 LINEでの手順</div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+        <div style="background:#4CAF82;color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">1</div>
+        <div style="font-size:13px;color:#1C2B35;line-height:1.6;">LINEが開いたら<strong>「追加」</strong>ボタンを押して友達追加してください</div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+        <div style="background:#4CAF82;color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">2</div>
+        <div style="font-size:13px;color:#1C2B35;line-height:1.6;">トーク画面下の<strong>リッチメニュー</strong>を開いてください</div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <div style="background:#4CAF82;color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">3</div>
+        <div style="font-size:13px;color:#1C2B35;line-height:1.6;"><strong>「📩 申し込み完了はこちら」</strong>ボタンを押すと予約が確定します</div>
+      </div>
+    </div>
+
+    <div style="background:#FFF8E8;border:1px solid #F4D88A;border-radius:10px;padding:14px;font-size:12px;color:#8B6200;line-height:1.8;text-align:left;">
+      ⚠️ <strong>ボタンを押すまで予約は完了しません</strong><br>
+      LINEが開かない場合は、公式LINEアカウント<br>
+      「<strong>ピカラボ</strong>」を検索して友達追加してください
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// =========================================
+// State
+// =========================================
+const state = {
+  menu: null,
+  washerType: null,
+  airconType: null,
+  options: [],
+  dates: [],
+  timePreference: null,
+  name: '', phone: '', email: '', address: '',
+  parking: null, elevator: null, notes: ''
+};
+
+const LINE_URL = 'https://lin.ee/9EohJY3';
+
+// =========================================
+// Options data
+// =========================================
+
+// 洗濯機：ドラム型オプション
+const drumOptions = [
+  {
+    id: 'd1', name: '洗濯槽抜き洗浄', price: '+¥10,000〜',
+    desc: '洗濯槽を抜いてカビ・水垢を徹底洗浄！カビ臭いお悩みの方におすすめ。Panasonicのみ +¥13,000',
+    hasMaker: true, makerId: 'd1maker',
+    makers: [
+      { id: 'd1m1', label: 'Panasonic', price: '+¥13,000' },
+      { id: 'd1m2', label: 'その他メーカー', price: '+¥10,000' },
+    ]
+  },
+  {
+    id: 'd2', name: '乾燥機洗浄', price: '+¥5,000〜',
+    desc: '乾燥時間が遅い方におすすめ。メーカー・機種により異なります',
+    hasMaker: true, makerId: 'd2maker',
+    makers: [
+      { id: 'd2m1', label: 'Panasonic VX/LX', price: '+¥5,000' },
+      { id: 'd2m2', label: 'Panasonic VG/SD・SHARP JUST SIZE DRUM', price: '+¥8,000' },
+      { id: 'd2m3', label: 'SHARP・TOSHIBA（その他）', price: '+¥15,000' },
+    ]
+  },
+  { id: 'd3', name: '洗濯パン・排水口清掃', price: '+¥4,000〜¥8,000', desc: '洗濯機移動あり：¥8,000 / 移動なし：¥4,000' },
+  { id: 'd4', name: 'ベルト・ホース交換【Panasonic限定】', price: '+¥5,000', desc: '消耗品の交換（当日判断可能）' },
+  { id: 'd5', name: 'ヒートポンプ交換【Panasonic限定】', price: '+¥38,500', desc: '乾燥機能を完全に改善' },
+  { id: 'd_note', name: '💡 当日汚れ状況を見てから検討可能', price: '', desc: '上記オプションは当日現場でご確認いただいてから追加いただけます。お気軽にご相談ください。', isNote: true },
+];
+
+// 洗濯機：縦型オプション
+const tateOptions = [
+  { id: 't1', name: '乾燥機能付き', price: '+¥5,000', desc: '乾燥機能付きの洗濯機が対象です' },
+  { id: 't2', name: '洗濯パン・排水口清掃', price: '+¥4,000', desc: '洗濯パン、排水溝を清掃します' },
+  {
+    id: 't3', name: '嵩上げ台設置', price: '+¥7,000〜',
+    desc: '5.5cm：+¥7,000 / 10.5cm：+¥8,000',
+    hasMaker: true, makerId: 't3size',
+    makers: [
+      { id: 't3s1', label: '5.5cm', price: '+¥7,000' },
+      { id: 't3s2', label: '10.5cm', price: '+¥8,000' },
+    ]
+  },
+  { id: 't_note', name: '💡 当日汚れ状況を見てから検討可能', price: '', desc: '上記オプションは当日現場でご確認いただいてから追加いただけます。お気軽にご相談ください。', isNote: true },
+];
+
+// 風呂釜オプション
+const furoOptions = [
+  { id: 'f1', name: 'プレミアム除菌・消臭薬追加', price: '+¥4,000', desc: '強力な除菌・消臭薬を追加投入' },
+  { id: 'f2', name: 'エプロン内高圧洗浄', price: '+¥7,000', desc: '浴槽エプロン内部の高圧洗浄' },
+  { id: 'f3', name: '排水口清掃', price: '+¥1,500', desc: '排水口の分解・清掃' },
+  { id: 'f4', name: '浴室鏡ウロコ取り', price: '+¥5,000〜', desc: '大きさにより料金が異なります' },
+  { id: 'f_note', name: '💡 当日汚れ状況を見てから検討可能', price: '', desc: '上記オプションは当日現場でご確認いただいてから追加いただけます。お気軽にご相談ください。', isNote: true },
+];
+
+// エアコンオプション
+const airconOptions = [
+  { id: 'a1', name: '防カビ抗菌コートスプレー', price: '+¥3,000', desc: 'カビ・菌の繁殖を長期間抑制' },
+  { id: 'a2', name: '室外機洗浄', price: '+¥4,000', desc: '室外機フィンの高圧洗浄' },
+  { id: 'a_note', name: '💡 当日汚れ状況を見てから検討可能', price: '', desc: '上記オプションは当日現場でご確認いただいてから追加いただけます。お気軽にご相談ください。', isNote: true },
+];
+
+const optionsData = {
+  washer: [], // washerTypeに応じて動的に切り替え
+  furo: furoOptions,
+  aircon: airconOptions,
+};
+
+// エアコン種別
+const airconTypes = [
+  { id: 'ac_normal',   name: 'ノーマル壁掛け',       price: '¥11,000〜' },
+  { id: 'ac_clean',    name: 'お掃除機能付き壁掛け', price: '¥16,000〜' },
+  { id: 'ac_ceiling',  name: '天井埋め込み',           price: '¥18,000〜' },
+  { id: 'ac_biz',      name: '業務用エアコン4方向',   price: '¥25,000〜' },
+];
+
+// =========================================
+// Unavailable dates (YYYY-MM-DD) ← ここで予約不可日を設定
+// =========================================
+// =========================================
+// 予約可否の設定 ← ここで管理してください
+// =========================================
+// 完全に予約不可の日（両スロット不可）
+const unavailableDates = [
+  '2026-05-11',
+  '2026-05-18',
+  '2026-05-25',
+  '2026-05-31',
+];
+
+// 9:00〜のみ不可の日（14:00〜は予約可能）
+const unavailable9 = [
+  // 例: '2026-05-14',
+];
+
+// 14:00〜のみ不可の日（9:00〜は予約可能）
+const unavailable14 = [
+  // 例: '2026-05-15',
+];
+
+// 選択中の日付（時間帯選択待ち）
+let pendingDate = null;
+
+// =========================================
+// Calendar
+// =========================================
+let calYear, calMonth;
+
+function initCalendar() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCalendar();
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('calMonth').textContent = `${calYear}年 ${months[calMonth]}`;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  const days = ['日','月','火','水','木','金','土'];
+  days.forEach((d,i) => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-label';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-cell empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(calYear, calMonth, d);
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const el = document.createElement('div');
+    const dow = date.getDay();
+    let classes = ['cal-cell'];
+    if (dow === 0) classes.push('sun');
+    if (dow === 6) classes.push('sat');
+    if (date.getTime() === today.getTime()) classes.push('today');
+
+    if (date < today) {
+      classes.push('past');
+    } else if (unavailableDates.includes(dateStr)) {
+      classes.push('unavailable');
+    } else {
+      classes.push('available');
+      el.onclick = () => onDateClick(dateStr, d, el);
+    }
+    if (state.dates.some(x => x.dateStr === dateStr)) classes.push('selected');
+    if (pendingDate === dateStr) classes.push('selected');
+    el.className = classes.join(' ');
+    el.textContent = d;
+    grid.appendChild(el);
+  }
+}
+
+function onDateClick(dateStr, d, el) {
+  // すでに確定済みの場合は削除
+  const idx = state.dates.findIndex(x => x.dateStr === dateStr);
+  if (idx > -1) {
+    state.dates.splice(idx, 1);
+    pendingDate = null;
+    hideDatePicker();
+    updateDateTags();
+    renderCalendar();
+    return;
+  }
+  if (state.dates.length >= 3) {
+    alert('希望日は最大3つまで選択できます');
+    return;
+  }
+  // 時間帯選択へ
+  pendingDate = dateStr;
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const dowNames = ['日','月','火','水','木','金','土'];
+  const dateObj = new Date(calYear, calMonth, d);
+  const label = `${calYear}年${months[calMonth]}${d}日（${dowNames[dateObj.getDay()]}）`;
+  document.getElementById('timePickerDateLabel').textContent = label;
+
+  // スロット可否を反映
+  const slot9 = document.getElementById('slot_9');
+  const slot14 = document.getElementById('slot_14');
+  if (unavailable9.includes(dateStr)) {
+    slot9.classList.add('unavailable-slot');
+    slot9.style.opacity = '0.4';
+    slot9.style.cursor = 'not-allowed';
+    slot9.onclick = null;
+  } else {
+    slot9.classList.remove('unavailable-slot');
+    slot9.style.opacity = '1';
+    slot9.style.cursor = 'pointer';
+    slot9.onclick = () => selectTimeSlot('9:00〜');
+  }
+  if (unavailable14.includes(dateStr)) {
+    slot14.classList.add('unavailable-slot');
+    slot14.style.opacity = '0.4';
+    slot14.style.cursor = 'not-allowed';
+    slot14.onclick = null;
+  } else {
+    slot14.classList.remove('unavailable-slot');
+    slot14.style.opacity = '1';
+    slot14.style.cursor = 'pointer';
+    slot14.onclick = () => selectTimeSlot('14:00〜');
+  }
+  slot9.classList.remove('selected');
+  slot14.classList.remove('selected');
+  document.getElementById('timeSlotError').classList.remove('show');
+  document.getElementById('timePickerArea').style.display = 'block';
+  renderCalendar();
+}
+
+function selectTimeSlot(time) {
+  if (!pendingDate) return;
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const dowNames = ['日','月','火','水','木','金','土'];
+  const parts = pendingDate.split('-');
+  const dateObj = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+  const d = dateObj.getDate();
+  const m = dateObj.getMonth();
+  const label = `${parts[0]}年${months[m]}${d}日（${dowNames[dateObj.getDay()]}）${time}`;
+  state.dates.push({ dateStr: pendingDate, label });
+  pendingDate = null;
+  hideDatePicker();
+  updateDateTags();
+  renderCalendar();
+  document.getElementById('dateError').classList.remove('show');
+}
+
+function hideDatePicker() {
+  document.getElementById('timePickerArea').style.display = 'none';
+  document.getElementById('slot_9').classList.remove('selected');
+  document.getElementById('slot_14').classList.remove('selected');
+}
+
+function updateDateTags() {
+  const box = document.getElementById('selectedDatesBox');
+  const tags = document.getElementById('selectedDateTags');
+  if (state.dates.length === 0) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  const pref = ['第1希望','第2希望','第3希望'];
+  tags.innerHTML = state.dates.map((d,i) =>
+    `<span class="date-tag">${pref[i]}：${d.label} <button onclick="removeDate(${i})">×</button></span>`
+  ).join('');
+}
+
+function removeDate(i) {
+  state.dates.splice(i, 1);
+  updateDateTags();
+  renderCalendar();
+}
+
+// =========================================
+// Menu / Options
+// =========================================
+function selectMenu(menu) {
+  state.menu = menu;
+  state.options = [];
+  state.washerType = null;
+  state.airconType = null;
+  state.makerSelections = {};
+  document.querySelectorAll('.menu-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`[data-menu="${menu}"]`).classList.add('selected');
+  document.getElementById('washerTypeArea').classList.toggle('show', menu === 'washer');
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('menuError').classList.remove('show');
+}
+
+function selectWasherType(type) {
+  state.washerType = type;
+  document.querySelectorAll('.type-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.type === type);
+  });
+}
+
+function togglePrice() {
+  const wrap = document.getElementById('priceTableWrap');
+  const toggle = document.getElementById('priceToggle');
+  wrap.classList.toggle('show');
+  toggle.classList.toggle('open');
+}
+
+function getActiveOpts() {
+  if (state.menu === 'washer') {
+    if (state.washerType === 'ドラム型') return drumOptions;
+    if (state.washerType && state.washerType.startsWith('縦型')) return tateOptions;
+    return [];
+  }
+  if (state.menu === 'furo') return furoOptions;
+  if (state.menu === 'aircon') return airconOptions;
+  return [];
+}
+
+function renderOptions() {
+  const container = document.getElementById('optionsContainer');
+  let html = '';
+
+  // エアコンの場合は種別選択を先に表示
+  if (state.menu === 'aircon') {
+    html += `
+      <div style="margin-bottom:16px;">
+        <div class="sub-label" style="margin-bottom:10px;">エアコンの種類を選択してください <span style="color:var(--error);font-size:11px;">必須</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="airconTypeGrid">
+          ${airconTypes.map(t => `
+            <div class="option-item${state.airconType === t.id ? ' selected' : ''}" id="atype_${t.id}" onclick="selectAirconType('${t.id}')">
+              <div class="option-checkbox${state.airconType === t.id ? ' selected' : ''}" id="achk_${t.id}">${state.airconType === t.id ? '✓' : ''}</div>
+              <div class="option-info"><div class="option-name">${t.name}</div></div>
+              <div class="option-price">${t.price}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="error-msg" id="airconTypeError">エアコンの種類を選択してください</div>
+      </div>
+      <div class="divider"></div>
+      <div class="sub-label" style="margin-bottom:10px;">追加オプション（任意）</div>
+    `;
+  }
+
+  const opts = getActiveOpts();
+
+  if (opts.length === 0) {
+    html += '<p style="color:var(--mid);font-size:13px;">オプションはありません</p>';
+  } else {
+    html += opts.map(o => {
+      // 当日検討可能ノートは特別表示（選択不可）
+      if (o.isNote) {
+        return `
+          <div style="margin-top:8px;padding:12px 14px;background:linear-gradient(135deg,#FFF8E8,#FFF3D4);border:1px dashed var(--accent);border-radius:10px;display:flex;align-items:flex-start;gap:10px;">
+            <span style="font-size:18px;flex-shrink:0;">💡</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#B07800;">${o.name.replace('💡 ','')}</div>
+              <div style="font-size:12px;color:#8B6200;margin-top:3px;line-height:1.6;">${o.desc}</div>
+            </div>
+          </div>
+        `;
+      }
+      const isSelected = state.options.includes(o.id);
+      const makerHtml = o.hasMaker ? `
+        <div id="maker_${o.makerId}" style="display:${isSelected ? 'block' : 'none'};margin-top:10px;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border);">
+          <div style="font-size:11px;font-weight:700;color:var(--sky-dark);margin-bottom:6px;">▶ 機種・サイズを選択</div>
+          ${o.makers.map(m => `
+            <label style="display:flex;align-items:center;gap:8px;margin-bottom:5px;cursor:pointer;font-size:12px;">
+              <input type="radio" name="${o.makerId}" value="${m.id}" onchange="selectMaker('${o.id}','${m.id}','${m.label}','${m.price}')" style="accent-color:var(--sky);">
+              <span>${m.label}</span>
+              <span style="margin-left:auto;font-weight:700;color:var(--accent);">${m.price}</span>
+            </label>
+          `).join('')}
+        </div>
+      ` : '';
+      return `
+        <div class="option-item${isSelected ? ' selected' : ''}" id="opt_${o.id}" onclick="toggleOption('${o.id}')">
+          <div class="option-checkbox${isSelected ? ' selected' : ''}" id="chk_${o.id}">${isSelected ? '✓' : ''}</div>
+          <div class="option-info" style="width:100%;">
+            <div class="option-name">${o.name}</div>
+            <div class="option-desc">${o.desc}</div>
+            ${makerHtml}
+          </div>
+          <div class="option-price">${o.price}</div>
+        </div>
+      `;
+    }).join('');
+  }
+  container.innerHTML = html;
+}
+
+function selectMaker(optId, makerId, label, price) {
+  if (!state.makerSelections) state.makerSelections = {};
+  state.makerSelections[optId] = { id: makerId, label, price };
+}
+
+function selectAirconType(id) {
+  state.airconType = id;
+  airconTypes.forEach(t => {
+    const item = document.getElementById(`atype_${t.id}`);
+    const chk  = document.getElementById(`achk_${t.id}`);
+    if (item) {
+      item.classList.toggle('selected', t.id === id);
+      chk.classList.toggle('selected', t.id === id);
+      chk.textContent = t.id === id ? '✓' : '';
+    }
+  });
+  const errEl = document.getElementById('airconTypeError');
+  if (errEl) errEl.classList.remove('show');
+}
+
+function toggleOption(id) {
+  const opts  = getActiveOpts();
+  const opt   = opts.find(o => o.id === id);
+  if (!opt || opt.isNote) return; // ノートアイテムは選択不可
+  const idx = state.options.indexOf(id);
+  const item = document.getElementById(`opt_${id}`);
+  const chk  = document.getElementById(`chk_${id}`);
+
+  if (idx > -1) {
+    state.options.splice(idx, 1);
+    item.classList.remove('selected');
+    chk.classList.remove('selected');
+    chk.textContent = '';
+    if (opt?.hasMaker) {
+      const makerDiv = document.getElementById(`maker_${opt.makerId}`);
+      if (makerDiv) makerDiv.style.display = 'none';
+    }
+    if (state.makerSelections) delete state.makerSelections[id];
+  } else {
+    state.options.push(id);
+    item.classList.add('selected');
+    chk.classList.add('selected');
+    chk.textContent = '✓';
+    if (opt?.hasMaker) {
+      const makerDiv = document.getElementById(`maker_${opt.makerId}`);
+      if (makerDiv) makerDiv.style.display = 'block';
+    }
+  }
+}
+
+function selectRadio(field, value, el) {
+  state[field] = value;
+  el.closest('.radio-group').querySelectorAll('.radio-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById(`${field}Error`).classList.remove('show');
+}
+
+// =========================================
+// Step navigation
+// =========================================
+function goStep(n) {
+  [1,2,3,4,5,6].forEach(i => {
+    const el = document.getElementById(`step${i}`);
+    if (el) el.style.display = i === n ? 'block' : 'none';
+  });
+  updateProgress(n);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(step) {
+  const fills = [0, 0, 25, 50, 75, 100];
+  document.getElementById('progressFill').style.width = fills[step] + '%';
+  for (let i = 0; i <= 4; i++) {
+    const dot = document.getElementById(`dot${i}`);
+    dot.classList.remove('active','done');
+    if (i + 1 < step) dot.classList.add('done');
+    else if (i + 1 === step) dot.classList.add('active');
+  }
+}
+
+function goStep2() {
+  if (!state.menu) { document.getElementById('menuError').classList.add('show'); return; }
+  if (state.menu === 'washer' && !state.washerType) { alert('洗濯機の種類を選択してください'); return; }
+  renderOptions();
+  goStep(2);
+}
+
+function goStep3() {
+  if (state.menu === 'aircon' && !state.airconType) {
+    const errEl = document.getElementById('airconTypeError');
+    if (errEl) errEl.classList.add('show');
+    return;
+  }
+  goStep(3);
+  initCalendar();
+}
+
+function goStep4() {
+  if (state.dates.length < 3) { document.getElementById('dateError').classList.add('show'); return; }
+  goStep(4);
+}
+
+function goStep5() {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const address = document.getElementById('address').value.trim();
+  let ok = true;
+  if (!name) { document.getElementById('nameError').classList.add('show'); ok = false; } else document.getElementById('nameError').classList.remove('show');
+  if (!phone) { document.getElementById('phoneError').classList.add('show'); ok = false; } else document.getElementById('phoneError').classList.remove('show');
+  if (!address) { document.getElementById('addressError').classList.add('show'); ok = false; } else document.getElementById('addressError').classList.remove('show');
+  if (!state.parking) { document.getElementById('parkingError').classList.add('show'); ok = false; } else document.getElementById('parkingError').classList.remove('show');
+  if (!state.elevator) { document.getElementById('elevatorError').classList.add('show'); ok = false; } else document.getElementById('elevatorError').classList.remove('show');
+  if (!ok) return;
+  state.name = name; state.phone = phone;
+  state.address = address;
+  state.notes = document.getElementById('notes').value.trim();
+  renderConfirm();
+  goStep(5);
+}
+
+function renderConfirm() {
+  const menuNames = { washer:'洗濯機 分解清掃', furo:'風呂釜洗浄', aircon:'エアコン 分解清掃' };
+  const opts = getActiveOpts();
+  const selectedOptNames = state.options.map(id => {
+    const o = opts.find(o => o.id === id);
+    if (!o) return null;
+    const maker = state.makerSelections?.[id];
+    return maker ? `${o.name}（${maker.label}・${maker.price}）` : `${o.name}（${o.price}）`;
+  }).filter(Boolean);
+  const pref = ['第1希望','第2希望','第3希望'];
+  const dates = state.dates.map((d,i) => `${pref[i]}：${d.label}`).join('<br>');
+  const airconTypeName = state.airconType ? airconTypes.find(t => t.id === state.airconType)?.name : null;
+  const subType = state.washerType ? `（${state.washerType}）` : (airconTypeName ? `（${airconTypeName}）` : '');
+
+  document.getElementById('confirmContent').innerHTML = `
+    <div class="confirm-row"><div class="confirm-key">メニュー</div><div class="confirm-val">${menuNames[state.menu]}${subType}</div></div>
+    <div class="confirm-row"><div class="confirm-key">オプション</div><div class="confirm-val">${selectedOptNames.length ? selectedOptNames.join('<br>') : 'なし'}</div></div>
+    <div class="confirm-row"><div class="confirm-key">希望日時</div><div class="confirm-val">${dates}</div></div>
+    <div class="confirm-row"><div class="confirm-key">お名前</div><div class="confirm-val">${state.name}</div></div>
+    <div class="confirm-row"><div class="confirm-key">電話番号</div><div class="confirm-val">${state.phone}</div></div>
+    <div class="confirm-row"><div class="confirm-key">住所</div><div class="confirm-val">${state.address}</div></div>
+    <div class="confirm-row"><div class="confirm-key">駐車場</div><div class="confirm-val">${state.parking}</div></div>
+    <div class="confirm-row"><div class="confirm-key">エレベーター</div><div class="confirm-val">${state.elevator}</div></div>
+    ${state.notes ? `<div class="confirm-row"><div class="confirm-key">ご要望</div><div class="confirm-val">${state.notes}</div></div>` : ''}
+  `;
+}
+
+function updateAgree() {
+  document.getElementById('agreeError').classList.remove('show');
+}
+
+function submitToLine(e) {
+  e.preventDefault();
+  if (!document.getElementById('agreeCheck').checked) {
+    document.getElementById('agreeError').classList.add('show');
+    return;
+  }
+  // 友達追加URLに飛ぶ
+  window.open(LINE_URL, '_blank');
+  goStep(6);
+}
+</script>
+</body>
+</html>
