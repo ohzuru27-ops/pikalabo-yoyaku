@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>予約管理 | ピカラボ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #5BB8D4;
+    --sky-light: #EBF7FB;
+    --sky-dark: #3A9AB8;
+    --accent: #F4A428;
+    --dark: #1C2B35;
+    --mid: #4A6572;
+    --light: #8FA8B4;
+    --bg: #F0F7FA;
+    --white: #FFFFFF;
+    --border: #D0E8EF;
+    --unavailable: #FDECEA;
+    --unavailable-border: #E57373;
+    --partial9: #FFF3E0;
+    --partial9-border: #FFB74D;
+    --partial14: #E8F5E9;
+    --partial14-border: #66BB6A;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  /* ===== LOGIN ===== */
+  .login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #EBF7FB 0%, #D6EEF5 100%);
+  }
+  .login-card {
+    background: white;
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 360px;
+    box-shadow: 0 8px 40px rgba(91,184,212,0.15);
+    text-align: center;
+  }
+  .login-logo {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--sky-dark);
+    margin-bottom: 6px;
+  }
+  .login-logo span { color: var(--accent); }
+  .login-sub { font-size: 13px; color: var(--light); margin-bottom: 32px; }
+  .login-label { font-size: 12px; font-weight: 700; color: var(--mid); text-align: left; margin-bottom: 6px; }
+  .login-input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    color: var(--dark);
+    outline: none;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+  .login-input:focus { border-color: var(--sky); }
+  .login-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--sky), var(--sky-dark));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(91,184,212,0.3);
+  }
+  .login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(91,184,212,0.4); }
+  .login-error { color: #E05C5C; font-size: 12px; margin-top: 10px; display: none; }
+
+  /* ===== ADMIN ===== */
+  .admin-wrap { display: none; }
+  .header {
+    background: white;
+    border-bottom: 2px solid var(--sky-light);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(91,184,212,0.08);
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo { font-family: 'Shippori Mincho', serif; font-size: 20px; font-weight: 600; color: var(--sky-dark); }
+  .logo span { color: var(--accent); }
+  .header-badge {
+    background: var(--sky-light);
+    color: var(--sky-dark);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .logout-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    color: var(--mid);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: var(--sky); color: var(--sky-dark); }
+
+  .main { max-width: 780px; margin: 0 auto; padding: 28px 16px 80px; }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(91,184,212,0.06);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: linear-gradient(135deg, var(--sky), var(--sky-dark));
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+  }
+  .card-title { font-size: 15px; font-weight: 700; }
+  .card-title small { display: block; font-size: 11px; font-weight: 400; opacity: 0.85; margin-top: 2px; }
+  .card-body { padding: 20px; }
+
+  /* ===== CALENDAR ===== */
+  .cal-nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .cal-nav-btn {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--sky-dark);
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cal-nav-btn:hover { background: var(--sky); color: white; border-color: var(--sky); }
+  .cal-month-label { font-size: 16px; font-weight: 700; color: var(--dark); }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+  }
+  .cal-day-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 0;
+    color: var(--mid);
+  }
+  .cal-day-label:first-child { color: #E05C5C; }
+  .cal-day-label:last-child { color: var(--sky-dark); }
+
+  .cal-cell {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.15s;
+    position: relative;
+    user-select: none;
+    background: var(--bg);
+  }
+  .cal-cell.empty { cursor: default; background: none; }
+  .cal-cell.past { color: #C8C8C8; cursor: not-allowed; background: none; }
+  .cal-cell.today { border-color: var(--accent) !important; }
+  .cal-cell.available { color: var(--dark); }
+  .cal-cell.available:hover { background: var(--sky-light); border-color: var(--sky); }
+  .cal-cell.sun { color: #E05C5C; }
+  .cal-cell.sat { color: var(--sky-dark); }
+
+  /* 予約不可（全日） */
+  .cal-cell.off-all {
+    background: var(--unavailable);
+    border-color: var(--unavailable-border);
+    color: var(--unavailable-border);
+  }
+  .cal-cell.off-all::after { content: '✕'; font-size: 10px; position: absolute; bottom: 2px; right: 3px; }
+
+  /* 9:00〜のみ不可 */
+  .cal-cell.off-9 {
+    background: var(--partial9);
+    border-color: var(--partial9-border);
+    color: var(--dark);
+  }
+  .cal-cell.off-9::after { content: '午前×'; font-size: 8px; position: absolute; bottom: 2px; color: var(--partial9-border); font-weight: 700; }
+
+  /* 14:00〜のみ不可 */
+  .cal-cell.off-14 {
+    background: var(--partial14);
+    border-color: var(--partial14-border);
+    color: var(--dark);
+  }
+  .cal-cell.off-14::after { content: '午後×'; font-size: 8px; position: absolute; bottom: 2px; color: var(--partial14-border); font-weight: 700; }
+
+  /* ===== LEGEND ===== */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+    font-size: 11px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; color: var(--mid); }
+  .legend-dot {
+    width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid;
+    flex-shrink: 0;
+  }
+  .legend-dot.available { background: var(--bg); border-color: var(--border); }
+  .legend-dot.off-all { background: var(--unavailable); border-color: var(--unavailable-border); }
+  .legend-dot.off-9 { background: var(--partial9); border-color: var(--partial9-border); }
+  .legend-dot.off-14 { background: var(--partial14); border-color: var(--partial14-border); }
+
+  /* ===== MODAL ===== */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(28,43,53,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 16px;
+  }
+  .modal-bg.show { display: flex; animation: fadeIn 0.2s; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 340px;
+    padding: 24px;
+    box-shadow: 0 16px 60px rgba(0,0,0,0.2);
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-date {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--dark);
+    text-align: center;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-label { font-size: 12px; font-weight: 700; color: var(--mid); margin-bottom: 10px; }
+  .modal-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .modal-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mid);
+    user-select: none;
+  }
+  .modal-option:hover { border-color: var(--sky); background: var(--sky-light); color: var(--dark); }
+  .modal-option.selected-available { border-color: var(--sky); background: var(--sky-light); color: var(--sky-dark); }
+  .modal-option.selected-off-all { border-color: var(--unavailable-border); background: var(--unavailable); color: var(--unavailable-border); }
+  .modal-option.selected-off-9 { border-color: var(--partial9-border); background: var(--partial9); color: #8B5E00; }
+  .modal-option.selected-off-14 { border-color: var(--partial14-border); background: var(--partial14); color: #2E6B34; }
+  .modal-icon { font-size: 18px; }
+  .modal-btns { display: flex; gap: 8px; }
+  .modal-save {
+    flex: 1;
+    background: linear-gradient(135deg, var(--sky), var(--sky-dark));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .modal-save:hover { transform: translateY(-1px); }
+  .modal-cancel {
+    flex: 1;
+    background: white;
+    color: var(--mid);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .modal-cancel:hover { border-color: var(--sky); color: var(--sky-dark); }
+
+  /* ===== SAVE STATUS ===== */
+  .save-status {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--dark);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    display: none;
+    z-index: 300;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+  .save-status.show { display: block; animation: slideUp 0.2s ease; }
+
+  /* ===== STATS ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .stat-card {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .stat-num { font-size: 24px; font-weight: 700; color: var(--sky-dark); }
+  .stat-label { font-size: 11px; color: var(--mid); margin-top: 2px; }
+
+  /* ===== BULK ACTIONS ===== */
+  .bulk-section { margin-top: 16px; }
+  .bulk-label { font-size: 12px; font-weight: 700; color: var(--mid); margin-bottom: 8px; }
+  .bulk-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .bulk-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1.5px solid;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .bulk-btn.clear { border-color: var(--border); color: var(--mid); background: white; }
+  .bulk-btn.clear:hover { border-color: var(--sky); color: var(--sky-dark); }
+  .bulk-btn.off-all-btn { border-color: var(--unavailable-border); color: var(--unavailable-border); background: var(--unavailable); }
+  .bulk-btn.off-all-btn:hover { background: #FDBDBD; }
+
+  /* ===== URL COPY ===== */
+  .url-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .url-text { font-size: 13px; color: var(--sky-dark); flex: 1; word-break: break-all; font-weight: 600; }
+  .copy-btn {
+    background: var(--sky);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { background: var(--sky-dark); }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div class="login-logo">ピカ<span>ラボ</span></div>
+    <div class="login-sub">予約管理システム</div>
+    <div class="login-label">パスワード</div>
+    <input class="login-input" type="password" id="pwInput" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="login-btn" onclick="doLogin()">ログイン</button>
+    <div class="login-error" id="loginError">パスワードが違います</div>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div class="admin-wrap" id="adminWrap">
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">ピカ<span>ラボ</span></div>
+      <div class="header-badge">管理画面</div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">ログアウト</button>
+  </div>
+
+  <div class="main">
+
+    <!-- 統計 -->
+    <div class="card">
+      <div class="card-header">
+        <span>📊</span>
+        <div class="card-title">今月の予約状況<small id="statsMonth"></small></div>
+      </div>
+      <div class="card-body">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="statAvail">-</div>
+            <div class="stat-label">予約可能日</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statOff" style="color:#E05C5C;">-</div>
+            <div class="stat-label">全日不可</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statPartial" style="color:var(--accent);">-</div>
+            <div class="stat-label">一部不可</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- カレンダー -->
+    <div class="card">
+      <div class="card-header">
+        <span>📅</span>
+        <div class="card-title">予約可否カレンダー<small>日付をタップして設定を変更できます</small></div>
+      </div>
+      <div class="card-body">
+        <div class="cal-nav-row">
+          <button class="cal-nav-btn" onclick="changeMonth(-1)">◀</button>
+          <div class="cal-month-label" id="calMonthLabel"></div>
+          <button class="cal-nav-btn" onclick="changeMonth(1)">▶</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot available"></div>予約可能</div>
+          <div class="legend-item"><div class="legend-dot off-all"></div>全日不可</div>
+          <div class="legend-item"><div class="legend-dot off-9"></div>午前（9:00〜）不可</div>
+          <div class="legend-item"><div class="legend-dot off-14"></div>午後（14:00〜）不可</div>
+        </div>
+        <div class="bulk-section">
+          <div class="bulk-label">一括操作</div>
+          <div class="bulk-btns">
+            <button class="bulk-btn clear" onclick="clearMonth()">今月の設定をすべてリセット</button>
+            <button class="bulk-btn off-all-btn" onclick="offWeekends()">今月の日曜をすべて不可にする</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 予約フォームURL -->
+    <div class="card">
+      <div class="card-header">
+        <span>🔗</span>
+        <div class="card-title">予約フォームURL<small>LINE・Instagramに貼るURL</small></div>
+      </div>
+      <div class="card-body">
+        <div class="url-box">
+          <div class="url-text" id="formUrl">https://pikalabo-yoyaku.netlify.app</div>
+          <button class="copy-btn" onclick="copyUrl()">コピー</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- モーダル -->
+<div class="modal-bg" id="modalBg" onclick="closeModalBg(event)">
+  <div class="modal">
+    <div class="modal-date" id="modalDate"></div>
+    <div class="modal-label">この日の予約状況を選択してください</div>
+    <div class="modal-options">
+      <div class="modal-option" id="opt-available" onclick="selectOpt('available')">
+        <span class="modal-icon">✅</span> 予約可能（通常通り）
+      </div>
+      <div class="modal-option" id="opt-off-all" onclick="selectOpt('off-all')">
+        <span class="modal-icon">❌</span> 全日予約不可
+      </div>
+      <div class="modal-option" id="opt-off-9" onclick="selectOpt('off-9')">
+        <span class="modal-icon">🌅</span> 午前（9:00〜）のみ不可
+      </div>
+      <div class="modal-option" id="opt-off-14" onclick="selectOpt('off-14')">
+        <span class="modal-icon">🌇</span> 午後（14:00〜）のみ不可
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-save" onclick="saveModal()">保存</button>
+      <button class="modal-cancel" onclick="closeModal()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- 保存通知 -->
+<div class="save-status" id="saveStatus">✅ 保存しました</div>
+
+<script>
+// =========================================
+// パスワード設定 ← ここを変更してください
+// =========================================
+const ADMIN_PASSWORD = 'ohzuru5382';
+
+// =========================================
+// ストレージキー
+// =========================================
+const STORAGE_KEY = 'pikalabo_schedule';
+
+// =========================================
+// State
+// =========================================
+let schedule = {}; // { 'YYYY-MM-DD': 'available'|'off-all'|'off-9'|'off-14' }
+let calYear, calMonth;
+let editingDate = null;
+let selectedOpt = 'available';
+
+// =========================================
+// Login
+// =========================================
+function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('adminWrap').style.display = 'block';
+    initAdmin();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+  }
+}
+
+function doLogout() {
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('adminWrap').style.display = 'none';
+  document.getElementById('pwInput').value = '';
+}
+
+// =========================================
+// Init
+// =========================================
+function initAdmin() {
+  loadSchedule();
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCalendar();
+  updateStats();
+}
+
+// =========================================
+// Storage
+// =========================================
+function loadSchedule() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    schedule = raw ? JSON.parse(raw) : {};
+  } catch(e) { schedule = {}; }
+}
+
+function saveSchedule() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(schedule));
+    showSaveStatus();
+  } catch(e) { alert('保存に失敗しました'); }
+}
+
+function showSaveStatus() {
+  const el = document.getElementById('saveStatus');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// =========================================
+// Calendar
+// =========================================
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCalendar();
+  updateStats();
+}
+
+function renderCalendar() {
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('calMonthLabel').textContent = `${calYear}年 ${months[calMonth]}`;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  const dayLabels = ['日','月','火','水','木','金','土'];
+  dayLabels.forEach((d,i) => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-label';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-cell empty';
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(calYear, calMonth, d);
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dow = date.getDay();
+    const el = document.createElement('div');
+    let classes = ['cal-cell'];
+    if (dow === 0) classes.push('sun');
+    if (dow === 6) classes.push('sat');
+    if (date.getTime() === today.getTime()) classes.push('today');
+
+    if (date < today) {
+      classes.push('past');
+    } else {
+      const status = schedule[dateStr] || 'available';
+      if (status === 'off-all') classes.push('off-all');
+      else if (status === 'off-9') classes.push('off-9');
+      else if (status === 'off-14') classes.push('off-14');
+      else classes.push('available');
+      el.onclick = () => openModal(dateStr, d);
+    }
+
+    el.className = classes.join(' ');
+    el.textContent = d;
+    grid.appendChild(el);
+  }
+}
+
+// =========================================
+// Stats
+// =========================================
+function updateStats() {
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('statsMonth').textContent = `${calYear}年${months[calMonth]}`;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  let avail = 0, offAll = 0, partial = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(calYear, calMonth, d);
+    if (date < today) continue;
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const status = schedule[dateStr] || 'available';
+    if (status === 'off-all') offAll++;
+    else if (status === 'off-9' || status === 'off-14') partial++;
+    else avail++;
+  }
+  document.getElementById('statAvail').textContent = avail;
+  document.getElementById('statOff').textContent = offAll;
+  document.getElementById('statPartial').textContent = partial;
+}
+
+// =========================================
+// Modal
+// =========================================
+function openModal(dateStr, d) {
+  editingDate = dateStr;
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const dowNames = ['日','月','火','水','木','金','土'];
+  const date = new Date(calYear, calMonth, d);
+  document.getElementById('modalDate').textContent =
+    `${calYear}年${months[calMonth]}${d}日（${dowNames[date.getDay()]}）`;
+
+  const current = schedule[dateStr] || 'available';
+  selectedOpt = current;
+  updateModalUI();
+  document.getElementById('modalBg').classList.add('show');
+}
+
+function selectOpt(opt) {
+  selectedOpt = opt;
+  updateModalUI();
+}
+
+function updateModalUI() {
+  ['available','off-all','off-9','off-14'].forEach(o => {
+    const el = document.getElementById(`opt-${o}`);
+    el.className = 'modal-option';
+    if (o === selectedOpt) el.classList.add(`selected-${o}`);
+  });
+}
+
+function saveModal() {
+  if (!editingDate) return;
+  if (selectedOpt === 'available') {
+    delete schedule[editingDate];
+  } else {
+    schedule[editingDate] = selectedOpt;
+  }
+  saveSchedule();
+  renderCalendar();
+  updateStats();
+  closeModal();
+}
+
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('show');
+  editingDate = null;
+}
+
+function closeModalBg(e) {
+  if (e.target === document.getElementById('modalBg')) closeModal();
+}
+
+// =========================================
+// Bulk actions
+// =========================================
+function clearMonth() {
+  if (!confirm('今月の設定をすべてリセットしますか？')) return;
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    delete schedule[dateStr];
+  }
+  saveSchedule();
+  renderCalendar();
+  updateStats();
+}
+
+function offWeekends() {
+  if (!confirm('今月の日曜日をすべて予約不可にしますか？')) return;
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(calYear, calMonth, d);
+    if (date.getDay() === 0) {
+      const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      schedule[dateStr] = 'off-all';
+    }
+  }
+  saveSchedule();
+  renderCalendar();
+  updateStats();
+}
+
+// =========================================
+// URL copy
+// =========================================
+function copyUrl() {
+  navigator.clipboard.writeText('https://pikalabo-yoyaku.netlify.app')
+    .then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'コピー済み✓';
+      setTimeout(() => btn.textContent = 'コピー', 2000);
+    });
+}
+</script>
+</body>
+</html>
